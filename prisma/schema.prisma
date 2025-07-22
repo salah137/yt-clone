@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  videos     Video[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Comment Comment[]
+
+  SubComment SubComment[]
+
+  VideoLike VideoLike[]
+
+  VideodDisLike VideodDisLike[]
+
+  VideoView VideoView[]
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  title     String
+  description String
+  thumbnail String
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  Comment Comment[]
+  VideoLike VideoLike[]
+  VideodDisLike VideodDisLike[]
+  VideoView VideoView[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  videoId   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([videoId]) 
+
+  SubComment SubComment[]
+}
+
+model SubComment {
+  id        String   @id @default(cuid())
+  content   String
+  commentId String
+  userId    String
+  mentionedUserId String?
+  user      User     @relation(fields: [userId], references: [id])
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([commentId])
+  @@index([mentionedUserId])
+}
+
+model VideoLike {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, videoId])
+}
+
+model VideodDisLike {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, videoId])
+}
+
+model VideoView {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, videoId])
+}
