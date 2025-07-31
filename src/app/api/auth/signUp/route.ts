@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             });
 
             let token = await jwt.sign(
-                { userId: newUser.id, email: newUser.email }, process.env.TOKEN,   // Secret key
+                { userId: newUser.id, email: newUser.email }, process.env.TOKEN!,   // Secret key
                 { algorithm: 'HS256' }
             )
 
