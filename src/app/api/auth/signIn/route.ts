@@ -35,12 +35,12 @@ export async function POST(req: Request) {
         }
 
         let token = await jwt.sign(
-            { userId: user.id, email: user.email }, process.env.TOKEN!,   // Secret key
+            { userId: user.id, email: user.email, verified : user.verified }, process.env.TOKEN!,   // Secret key
             { algorithm: 'HS256' }
         );
 
             const response = NextResponse.json(
-                { success: "User created", userId: user.id, verified: user.verified },
+                { success: "User created" },
                 { status: 201 }
             );
             response.cookies.set("token", token, {
@@ -49,6 +49,8 @@ export async function POST(req: Request) {
                 sameSite: "strict",
             
             });
+
+            
 
             return response;
     } catch (error) {

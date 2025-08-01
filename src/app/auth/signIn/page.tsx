@@ -3,14 +3,15 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ky from "ky";
-import { set } from "zod";
-
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
     const [data, setData] = useState({
         email: "",
         password: "",
     })
+
+    const router = useRouter();
 
     const [error, setError] = useState("");
     const [visible, setVisible] = useState(true);
@@ -78,15 +79,10 @@ export default function SignUp() {
                                     setError(errorData.error || "Something went wrong");
 
                                 } else {
-                                    const data = await res.json() as { userId: string, verified: boolean };
-
-                                    localStorage.setItem("userId", data.userId);
-                                    localStorage.setItem("verified", data.verified ? "true" : "false");
-
                                     setVisible(false);
 
                                     setTimeout(() => {
-                                        window.location.href = "/";
+                                        router.push("/");
                                     }, 1000);
 
                                 }

@@ -41,12 +41,12 @@ export async function POST(req: NextRequest) {
             });
 
             let token = await jwt.sign(
-                { userId: newUser.id, email: newUser.email }, process.env.TOKEN!,   // Secret key
+                { userId: newUser.id, email: newUser.email, verified : newUser.verified }, process.env.TOKEN!,   // Secret key
                 { algorithm: 'HS256' }
             )
 
             const response = NextResponse.json(
-                { success: "User created", userId: newUser.id },
+                { success: "User created", },
                 { status: 201 }
             );
             response.cookies.set("token", token, {
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
                 sameSite: "strict",
             
             });
+
 
             return response;
         }

@@ -30,7 +30,6 @@ export default function Verify() {
                     <h1 className='text-[#EEF4D4] text-3xl font-bold mb-5'>Verify Your Email</h1>
                     <motion.button onClick={
                         () => {
-                            setVisible(false);
                             const res = ky.post('/api/auth/verify', {   
                                 json: {
                                     id: localStorage.getItem("userId")

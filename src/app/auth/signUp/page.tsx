@@ -3,9 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ky from "ky";
-import Image from "next/image";
-import { CgProfile } from "react-icons/cg";
-
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
     const [data, setData] = useState({
@@ -14,10 +12,12 @@ export default function SignUp() {
         password: "",
         confirmPassword: "",
     })
+    const router = useRouter();
 
     const [error, setError] = useState("");
     const [visible, setVisible] = useState(true);
     const [image, setImage] = useState<string>();
+    const [file, setFile] = useState<File | null>(null);
 
     return (
         <AnimatePresence mode="wait">
@@ -39,34 +39,6 @@ export default function SignUp() {
 
                 <motion.div initial={{ y: 20, opacity: 0.5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className='ml-5 lg:w-[40vw] flex flex-col items-center justify-center p-5' >
                     <h1 className='text-[#EEF4D4] text-3xl font-bold mb-5'>Sign Up</h1>
-
-                    <input type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                                const image = URL.createObjectURL(file);
-                                setImage(image);
-                            }
-                        }}
-                        id = "imgInput"
-                    />
-
-                    {image ? <Image className="w-[10vh] h-[10vh] bg-[#DAEFB3] cursor-pointer rounded-full mb-4" onClick={
-                         () => {
-                            const input = document.getElementById("imgInput") as HTMLInputElement;
-                            input.click();
-                        }
-                    } src={image} alt="profile" height={50} width={50}/> : <div className="w-[10vh] flex justify-center items-center h-[10vh] cursor-pointer bg-[#DAEFB3] rounded-full text-xl" onClick={
-                        () => {
-                            const input = document.getElementById("imgInput") as HTMLInputElement;
-                            input.click();
-                        }
-                    }>
-                        <CgProfile  />
-    
-                    </div>}   
 
                     <input value={data.name} onChange={
                         (e) => setData({ ...data, name: e.target.value })
@@ -112,6 +84,7 @@ export default function SignUp() {
                             return;
                         }
                         try {
+
                             const res = await ky.post("/api/auth/signUp", {
                                 json: { name, email, password },
                                 credentials: "include",
@@ -121,18 +94,14 @@ export default function SignUp() {
                                 const errorData = await res.json() as { error: string };
                                 setError(errorData.error || "Something went wrong");
                             } else {
-                                const data = await res.json() as { userId: string };
-                                console.log(data);
-
-                                localStorage.setItem("userId", data.userId);
-                                localStorage.setItem("verified", "false");
+                
+                                localStorage.setItem("auth", "true");
 
                                 setVisible(false);
                                 setTimeout(() => {
-                                    window.location.href = "/";
+                                    router.push("/");
                                 }, 1000);
 
-                                window.location.href = "/";
                             }
                         } catch (error) {
                             console.error("Error during sign up:", error);
