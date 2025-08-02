@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
-
+import redisClient from '@/lib/redis';
 import transporter from '@/lib/nodemailer';
 
 export async function POST(req: NextRequest) {
@@ -36,11 +36,22 @@ export async function POST(req: NextRequest) {
 
             to: user.email,
             subject: "Verify your account",
-            text: `Click the link to verify your account: ${process.env.PUBLIC_BASE_URL}/auth/check?token=${verficationToken}`,
+            text: `Click the link to verify your account: ${process.env.PUBLIC_BASE_URL}/auth/check`,
         });
-        console.log(`Verification email sent to ${user.email}`);
+        
+        const resp = NextResponse.json({ message: "Verification email sent" }, { status: 200 });
 
-        return NextResponse.json({ message: "Verification email sent" }, { status: 200 });
+        resp.cookies.set("verificationToken", verficationToken,  {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+            
+            }
+        )
+
+        redisClient.setEx(`verification:${user.id}`, 60 * 15, verficationToken); // Store token in Redis for 15 minutes
+
+        return resp;
     } catch (error) {
         console.error("Error in verify route:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
