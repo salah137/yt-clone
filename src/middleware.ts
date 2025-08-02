@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
     const verified = req.cookies.get("verified")?.value;
 
     if (!verified) {
-        return NextResponse.redirect(new URL("/veify", req.url)); // Redirect to verification if not verified
+        return NextResponse.redirect(new URL("/auth/veify", req.url)); // Redirect to verification if not verified
     }   
 
     return NextResponse.next();
