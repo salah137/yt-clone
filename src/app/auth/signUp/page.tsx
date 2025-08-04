@@ -94,9 +94,9 @@ export default function SignUp() {
                                 const errorData = await res.json() as { error: string };
                                 setError(errorData.error || "Something went wrong");
                             } else {
-                
-                                localStorage.setItem("auth", "true");
-
+                                
+                                const data = await res.json() as { success: string, userName: string };
+                                localStorage.setItem("userName",  data.userName);
                                 setVisible(false);
                                 setTimeout(() => {
                                     router.push("/");

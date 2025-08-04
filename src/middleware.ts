@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
@@ -8,7 +7,6 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth", req.url)); // Redirect if no token
     }
 
-    
     const verified = req.cookies.get("verified")?.value;
 
     if (!verified) {

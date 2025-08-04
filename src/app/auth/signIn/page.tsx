@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { use, useState } from "react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
 
@@ -79,7 +79,10 @@ export default function SignUp() {
                                     setError(errorData.error || "Something went wrong");
 
                                 } else {
+                                    const data = await res.json() as { success: string, userName: string };
+
                                     setVisible(false);
+                                    localStorage.setItem("userName",  data.userName);
 
                                     setTimeout(() => {
                                         router.push("/");

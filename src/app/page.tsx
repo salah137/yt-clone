@@ -1,109 +1,120 @@
 "use client";
-
-import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CiSearch } from "react-icons/ci";
+import { motion } from "framer-motion";
+import { AddVideo, VideoComponent } from "./component";
+import { VideoDTO } from "@/models";
+
+import ky from "ky";
+import { IoIosAdd } from "react-icons/io";
 
 export default function Home() {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>("");
+  const [isBottom, setIsBottom] = useState(true);
+  const [videos, setVideos] = useState<VideoDTO[]>([]);
+
+  useEffect(() => {
+    
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= fullHeight - 100) {
+        setIsBottom(true);
+      } else {
+        
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+
+  },[])
+
+  useEffect(() => {
+      (async () => {
+        try {
+
+          if (isBottom) {
+          
+          const response = await ky.get("/api/videos/getAllVideos?skip="+videos.length,) ;
+          const data = await response.json() as {data: VideoDTO[]};
+          console.log(data.data);
+          setVideos((prevVideos) => [...prevVideos, ...data.data]);
+
+          setIsBottom(false);
+      }
+
+        } catch (error) {
+          console.error("Error fetching videos:", error);
+        }
+      })();
+  }, [isBottom]);
+
+  useEffect(() => {
+    const storedUserName = localStorage.getItem("userName");
+    setUserName(storedUserName!);
+    console.log(`Welcome, ${userName}!`);
+
+  }, []);
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div>
+      <header className="bg-[#2A2222] flex flex-row justify-between items-center p-4">
+        <button className="h-[5vh] w-[5vh] rounded-[50%] bg-[#EEF4D4] text-[#2A2222] font-black flex justify-center items-center text-center text-2xl">{userName[0]}</button>
+        <div className="text-[#EEF4D4 ] text-2xl font-bold ml-4  flex items-center justify-center">
+          <div className="flex items-center justify-center border-5 text-[#EEF4D4] border-[#EEF4D4] p-3 color-[#EEF4D4]">
+            <CiSearch />
+          </div>
+          <input
+            type="text"
+            placeholder="Search"
+            className="bg-[#2A2222] text-[#EEF4D4] px-4 py-[11px] outline-none border-b-5  border-[#EEF4D4] w-[30vw]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const query = (e.target as HTMLInputElement).value;
+                if (query) {
+                  router.push(`/search/${query}`);
+                }
+              }
+            }}
+          />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+          exit={{ x: 2000 }}
+          className="lg:w-[7.5vw] w-[7.5vw] h-[5vw] lg:h-[7vh] bg-[#EEF4D4] rounded-md flex justify-around items-center"
+        >
+          <div className="h-[1vh] w-[10vh] lg:h-[4vh] lg:w-[4vh] bg-[#2A2222] rounded-full" />
+          <div className="h-[10vh] w-[10vh]  lg:h-[4vh] lg:w-[4vh] bg-[#2A2222] rounded-full" />
+        </motion.div>
+
+      </header>
+
+      <main className="flex flex-col lg:grid lg:grid-cols-4 md:grid md:grid-cols-2 gap-2 p-4">
+        {videos.map((video) => {
+          return <VideoComponent video={video} key={1} /> })}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <button
+        className="flex justify-around items-center fixed bottom-4 h-[20vw] w-|20vh] lg:h-fit right-4 bg-[#EEF4D4] text-[#2A2222] p-3 rounded-full shadow-lg lg:w-[10vw]  hover:bg-[#eeecec] cursor-pointer"
+        onClick={() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      >
+        <IoIosAdd className="text-2xl"/>
+
+        <span className="text-[#2A2222] hidden lg:inline">Upload video</span>
+      </button>
+
+      <AddVideo />
     </div>
   );
 }
