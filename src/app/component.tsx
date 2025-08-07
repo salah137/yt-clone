@@ -7,10 +7,6 @@ import { useRef, useState } from 'react';
 import { FaUpload } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import ReactPlayer from 'react-player';
-import { useEffect } from 'react';
-import { Pause, Play, VolumeX, Volume2, Minimize2, Maximize2 } from 'lucide-react';
-import clsx from 'clsx';
-import screenfull from 'screenfull';
 
 export function Logo() {
   return (
@@ -28,7 +24,7 @@ export function Logo() {
 }
 
 export function VideoComponent(
-  props: { video: VideoDTO, key: number, onClick: () => void }
+  props: { video: VideoDTO, onClick: () => void }
 ) {
   const [error, setError] = useState<string>("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -295,7 +291,6 @@ export function AddVideo(props: { onClose: () => void, }) {
 
   </motion.div>
 }
-
 
 
 

@@ -31,7 +31,6 @@ export  async function GET(req: NextRequest) {
         title: video.title,
         description: video.description,
         url: videoUrl,
-        thumbnail: video.thumbnail,
         userId: video.userId,
         userName : video.user.name,
         viewCount: video.viewCount,

@@ -66,7 +66,7 @@ model Comment {
   video     Video    @relation(fields: [videoId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  subCount Int @default(0)
   @@index([videoId]) 
 
   SubComment SubComment[]
