@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CiSearch } from "react-icons/ci";
 import { motion } from "framer-motion";
-import { AddVideo, VideoComponent } from "./component";
+import Loader, { AddVideo, VideoComponent } from "./component";
 import { VideoDTO } from "@/models";
 
 import ky from "ky";
@@ -14,9 +14,12 @@ export default function Home() {
   const [userName, setUserName] = useState<string>("");
   const [isBottom, setIsBottom] = useState(true);
   const [videos, setVideos] = useState<VideoDTO[]>([]);
+  const [addVid, setAddVid] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [firstLoad, setFirstLoad] = useState<boolean>(false);
 
   useEffect(() => {
-    
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -25,33 +28,47 @@ export default function Home() {
       if (scrollTop + windowHeight >= fullHeight - 100) {
         setIsBottom(true);
       } else {
-        
+
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
 
-  },[])
+  }, [])
 
   useEffect(() => {
-      (async () => {
-        try {
+    (async () => {
+      try {
 
-          if (isBottom) {
-          
-          const response = await ky.get("/api/videos/getAllVideos?skip="+videos.length,) ;
-          const data = await response.json() as {data: VideoDTO[]};
+        if (isBottom) {
+
+          if (!firstLoad) {
+            setLoading(true);
+            const response = await ky.get("/api/videos/getAllVideos");
+            const data = await response.json() as { data: VideoDTO[] };
+            setVideos(data.data);
+            setLoading(false);
+            setFirstLoad(true);
+            setIsBottom(false);
+
+            console.log(videos);
+            
+            return;
+          }
+
+          const response = await ky.get("/api/videos/getAllVideos?skip=" + videos.length,);
+          const data = await response.json() as { data: VideoDTO[] };
           console.log(data.data);
           setVideos((prevVideos) => [...prevVideos, ...data.data]);
 
           setIsBottom(false);
-      }
-
-        } catch (error) {
-          console.error("Error fetching videos:", error);
         }
-      })();
+
+      } catch (error) {
+        console.error("Error fetching videos:", error);
+      }
+    })();
   }, [isBottom]);
 
   useEffect(() => {
@@ -98,23 +115,38 @@ export default function Home() {
 
       </header>
 
+      {
+      (loading && !firstLoad ) ? <div className="flex items-center justify-center w-[100vw] h-[100vh]">
+        <Loader />
+        </div> :
       <main className="flex flex-col lg:grid lg:grid-cols-4 md:grid md:grid-cols-2 gap-2 p-4">
-        {videos.map((video) => {
-          return <VideoComponent video={video} key={1} /> })}
-      </main>
+        {videos.map((video,i) => {
+          console.log(video);
+          
+          return <VideoComponent video={video} key={i} onClick = {
 
+            () => {
+              router.push(`watch/${video.id}`);
+            }
+          }/>
+        })}
+      </main>
+  }
       <button
         className="flex justify-around items-center fixed bottom-4 h-[20vw] w-|20vh] lg:h-fit right-4 bg-[#EEF4D4] text-[#2A2222] p-3 rounded-full shadow-lg lg:w-[10vw]  hover:bg-[#eeecec] cursor-pointer"
         onClick={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          setAddVid(true);
         }}
       >
-        <IoIosAdd className="text-2xl"/>
+        <IoIosAdd className="text-2xl" />
 
         <span className="text-[#2A2222] hidden lg:inline">Upload video</span>
       </button>
 
-      <AddVideo />
+      {addVid && <AddVideo onClose={() => {
+        setIsBottom(true);
+        setAddVid(false);
+      }} />}
     </div>
   );
 }

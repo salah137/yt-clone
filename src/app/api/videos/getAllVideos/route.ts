@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { get } from "http";
 
 export async function GET(req: NextRequest) {
-    
+
     function getTimeAgo(dateInput: Date | string): string {
         const now = new Date();
         const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
@@ -63,34 +63,39 @@ export async function GET(req: NextRequest) {
             },
         });
 
-        videos.forEach(video => {
+        videos.forEach((video: { thumbnail: string; url: string; id: any; title: any; user: { name: any; id: any; }; viewCount: any; createdAt: string | Date; }) => {
             const thumbnail = cloudinary.url(video.thumbnail,
                 {
+
                     transformation: [
-                        { width: 320, height: 180, crop: "fill" },
+                        { width: 640, height: 360, crop: "fill", gravity: "auto" },
                         { quality: "auto" },
-                        { fetch_format: "auto" },
-                        { aspect_ratio: "16:9" },
-                        { gravity: "auto" },
-                    ],
+                        { fetch_format: "auto" },]
                 }
             )
 
             const url = cloudinary.url(video.url, {
+                resource_type: "video",
                 transformation: [
-                    { width: 640, height: 360, crop: "fill" },
-                    { quality: "auto" },
-                    { duration: 5 },
-                    { aspect_ratio: "16:9" },
+                    {
+                        width: 640,
+                        height: 360,
+                        crop: "fill",
+                        aspect_ratio: "16:9",
+                        start_offset: "0",
+                        duration: "5", // ✅ duration & start_offset must be in the same object
+                        quality: "auto",
+                        fetch_format: "auto",
+                    },
                 ],
             });
-
+            
             data.push({
                 id: video.id,
                 title: video.title,
                 thumbnail: thumbnail,
                 url: url,
-                
+
                 userName: video.user.name,
                 userId: video.user.id,
                 viewCount: video.viewCount,
