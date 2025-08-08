@@ -13,6 +13,7 @@ export function Comments(props: { videoId: string }) {
     const [content, setContent] = useState("")
     const [isBottom, setIsBottom] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null)
+    const [sending,setSending] = useState(false)
 
   useEffect(() => {
     const container = containerRef.current;
@@ -86,7 +87,9 @@ export function Comments(props: { videoId: string }) {
             />
             <button className="bg-[#EEF4D4] h-fit p-4 text-md rounded-md hover:bg-[#e6f3a9] text-[#2A2222]" onClick={
                 async () => {
-                    if (content) {
+                    if (content && !sending) {
+                        setSending(true)
+
                         const res = await ky.post(
                             "/api/videos/comments/addComment",
                             {
@@ -96,11 +99,17 @@ export function Comments(props: { videoId: string }) {
                                 }
                             }
                         )
+
+                        setSending(false)
                         setIsBottom(true)
                     }
                 }
             }>
-                Send
+                {sending? 
+                <div className="flex items-center justify-center w-full h-full">
+      <div className=" border-4 border-[#2A2222]  rounded-full animate-spin"></div>
+    </div>
+                : "Done"}
             </button>
         </div>
 

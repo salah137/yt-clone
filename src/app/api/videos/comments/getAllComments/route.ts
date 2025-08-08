@@ -45,6 +45,9 @@ export async function GET(req: NextRequest) {
 
         const comments = await prisma.comment.findMany(
             {
+                orderBy : {
+                    createdAt : "desc"
+                },
                 where: {
                     videoId: videoId
                 },

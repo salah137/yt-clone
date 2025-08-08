@@ -12,8 +12,40 @@ export default function WatchPage() {
   const { videoId } = useParams();
   const [video, setVideo] = useState<WatchVideo>();
   const [loading, setLoading] = useState(true);
-  const [like,setLiking] = useState(false)
-  const [dislike,setdisLiking] = useState(false)
+  const [like, setLiking] = useState(false)
+  const [dislike, setdisLiking] = useState(false)
+
+  useEffect(() => {
+
+
+    const handleUnload = async () => {
+      // Trigger your logic here, e.g. call an API or update user status
+      console.log("User is closing the page or refreshing.");
+      // You can use fetch here with `keepalive: true`
+      navigator.sendBeacon(
+        "/api/video/endWatching",
+        new Blob(
+          [
+            JSON.stringify({
+              videoId: videoId,
+              like: like,
+              dislike: dislike
+            })
+          ],
+          { type: "application/json" }
+        )
+      );
+
+    };
+
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, []);
+
+
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -63,23 +95,23 @@ export default function WatchPage() {
     <div className="flex w-full lg:w-[15vw] justify-center text-xl ">
 
       <div className="flex w-full border-EEF4D4 border-4 rounded-lg justify-around items-center h-[5h] py-4  mr-3" onClick={
-        ()=>{
+        () => {
           setdisLiking(false)
           setLiking(l => !l)
         }
       }>
-       {like? <BiSolidLike />:<BiLike className="text-3xl" /> }
-        <span className="">{like? video.likeCount +1: video.likeCount}</span>
+        {like ? <BiSolidLike /> : <BiLike className="text-3xl" />}
+        <span className="">{like ? video.likeCount + 1 : video.likeCount}</span>
       </div>
 
       <div className="flex w-full border-EEF4D4 border-4 rounded-lg justify-around items-center h-[5h] py-4  ml-3" onClick={
-        ()=>{
+        () => {
           setLiking(false)
           setdisLiking(l => !l)
         }
       }>
-       {dislike? <BiSolidDislike />:<BiDislike className="text-3xl" />}
-        <span className="">{dislike? video.dislikeCount +1:video.dislikeCount  }</span>
+        {dislike ? <BiSolidDislike /> : <BiDislike className="text-3xl" />}
+        <span className="">{dislike ? video.dislikeCount + 1 : video.dislikeCount}</span>
       </div>
 
     </div>
@@ -101,7 +133,7 @@ export default function WatchPage() {
     </div>
 
   </div>
-  <Comments videoId={videoId!.toString()} />
+    <Comments videoId={videoId!.toString()} />
   </div>
 
 }
